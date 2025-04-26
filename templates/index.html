@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>简洁版 AI 搜索助手</title>
+</head>
+<body>
+    <h1>AI 搜索助手（极简版）</h1>
+    <form method="post">
+        <textarea name="command" rows="5" cols="80" placeholder="请输入 /list /load n /search 或直接提问"></textarea><br>
+        <button type="submit">发送</button>
+    </form>
+
+    <h2>返回结果：</h2>
+    {% if answer %}
+        {% if answer.split('\n')|length > 1 %}
+            <ul>
+            {% for line in answer.split('\n') %}
+                <li>{{ line }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <pre>{{ answer }}</pre>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

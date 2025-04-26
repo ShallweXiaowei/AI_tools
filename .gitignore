@@ -1,0 +1,29 @@
+# 忽略 Python 编译产生的文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 忽略虚拟环境
+.venv/
+
+# 忽略临时文件
+*.log
+*.tmp
+*.bak
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略 HTML 输出文件夹（如果不想提交的话，可以加上）
+html_outputs/
+
+# 忽略环境配置文件（如果有）
+.env
+.venv
+# 忽略保存的 session 文件夹
+saved_sessions/
+
+# 忽略输出的 HTML 网页文件夹
+html_outputs/
