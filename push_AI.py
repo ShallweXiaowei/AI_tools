@@ -9,25 +9,8 @@ import os
 import time
 from datetime import datetime
 import subprocess
-
-# ====== 配置区域 ======
-questions = {
-    "女优":"推荐最近比较火的日本AV女优，详细列出她们的信息"
-}
-
-# 指定使用的 LLM 模型
-MODEL_NAME = "deepseek-r1:14b-qwen-distill-q8_0"
-
-# 自定义 AI 角色描述
-AI_ROLE = '''
-    用户喜欢详细的信息,作为一个助手,会让回答尽量详细, 提供尽可能多的信息
-    你会尽量用中文回答问题.
-    你会尽量在重要的地方加上数据源链接
-    你的回答不用严格局限这个问题,可以揣测用户目的,提供更多信息。
-'''
-
-# 是否开启推送
-ENABLE_PUSH = True
+import argparse
+import json
 
 # ====== 主程序 ======
 # 获取 ZeroTier 分配的本地 IP
@@ -67,14 +50,14 @@ def save_html(content, filename):
     return filepath
 
 
-def custom_summarize_with_role(text_blocks, user_question):
+def custom_summarize_with_role(text_blocks, user_question, ai_role, model_name):
     messages = [
-        {"role": "system", "content": AI_ROLE},
+        {"role": "system", "content": ai_role},
         {"role": "user", "content": f"请回答这个问题：{user_question}\n你的回答可以基于以下网页内容：\n\n{text_blocks}"}
     ]
-    return ask_deepseek(messages, include_datetime=True, model=MODEL_NAME)
+    return ask_deepseek(messages, include_datetime=True, model=model_name)
 
-def auto_process_question(user_question,title = "AI分析完成",ENABLE_PUSH = True):
+def auto_process_question(user_question, title="AI分析完成", ENABLE_PUSH=True, ai_role="", model_name=""):
     if determine_search_need(user_question):
         print(f"🔍 [{user_question}] 判断需要搜索...")
         keywords = generate_search_keywords(user_question)
@@ -94,14 +77,14 @@ def auto_process_question(user_question,title = "AI分析完成",ENABLE_PUSH = T
                 summaries.append(f"[{url}]\n{summary}")
         
         combined_summary = "\n\n".join(summaries)
-        final_answer = custom_summarize_with_role(combined_summary, user_question)
+        final_answer = custom_summarize_with_role(combined_summary, user_question, ai_role, model_name)
 
         if urls:
             save_session(user_question, urls, combined_summary, final_answer)
 
     else:
         print(f"ℹ️ [{user_question}] 判断不需要搜索，直接回答...")
-        final_answer = custom_summarize_with_role("", user_question)
+        final_answer = custom_summarize_with_role("", user_question, ai_role, model_name)
 
     # 推送到 Bark
     if ENABLE_PUSH:
@@ -132,5 +115,18 @@ def auto_process_question(user_question,title = "AI分析完成",ENABLE_PUSH = T
     return final_answer
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Auto process AI questions")
+    parser.add_argument('config', help='Path to configuration JSON file')
+    args = parser.parse_args()
+
+    config_path = os.path.join("config_file", args.config)
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+
+    questions = config.get("questions", {})
+    MODEL_NAME = config.get("model_name", "deepseek-r1:14b-qwen-distill-q8_0")
+    AI_ROLE = config.get("ai_role", "你是一个助手")
+    ENABLE_PUSH = config.get("enable_push", True)
+
     for title, q in questions.items():
-        auto_process_question(q,title,ENABLE_PUSH=ENABLE_PUSH)
+        auto_process_question(q, title, ENABLE_PUSH, AI_ROLE, MODEL_NAME)
