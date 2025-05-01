@@ -5,7 +5,7 @@ url = "http://localhost:11434/api/chat"
 headers = {"Content-Type": "application/json"}
 
 #model = "deepseek-r1:14b-qwen-distill-q8_0"
-model = "gemma3:27b"
+model = "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L"
 
 
 

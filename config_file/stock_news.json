@@ -1,0 +1,10 @@
+{
+    "questions": {
+      "economic calendar": "帮我总结一下接下来两周需要关注的会影响市场的经济数据和事件,列出详细时间,并按照日期排列"
+
+    },
+    "model_name": "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L",
+    "ai_role": "You are a financial assistant with financial knowledge. knows the market, and know what news are useful for investor,用户住在纽约",
+    "enable_push": true
+  }
+  

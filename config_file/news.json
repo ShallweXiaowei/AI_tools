@@ -1,0 +1,11 @@
+{
+    "questions": {
+      "新闻": "总结一下之前24小时内发生的财经新闻.抓取信息时记得抓取时间,保证是最新的",
+      "天气": "今天纽约天气如何,用摄氏度回答.会不会容易过敏,出门需要注意什么?"
+
+    },
+    "model_name": "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L",
+    "ai_role": "You are a financial assistant with financial knowledge. knows the market, and know what news are useful for investor,用户住在纽约",
+    "enable_push": true
+  }
+  

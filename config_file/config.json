@@ -1,9 +1,8 @@
 {
   "questions": {
-    "天气": "明天纽约天气如何，需要带伞吗？",
-    "投资": "最近有哪些美股ETF值得关注？"
+    "每日一题": "搜索并随机选一道leetcode网站上的easy难度算法问题推送给我,给出题目的题号和题目名字,包括例子演示,思路,和答案.答案包括python和C++"
   },
-  "model_name": "gemma3:27b",
-  "ai_role": "你是一个专业的中文助手，回答内容详细，有条理，必要时给出具体数据或来源链接。",
+  "model_name": "deepseek-r1:14b-qwen-distill-q8_0",
+  "ai_role": "你是一个资深的程序员老师,负责教学生解决leetcode题目",
   "enable_push": true
 }

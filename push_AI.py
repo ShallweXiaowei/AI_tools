@@ -11,6 +11,7 @@ from datetime import datetime
 import subprocess
 import argparse
 import json
+import urllib.parse
 
 # ====== 主程序 ======
 # 获取 ZeroTier 分配的本地 IP
@@ -29,6 +30,10 @@ def get_zerotier_ip():
     except Exception as e:
         print(f"⚠️ 获取 ZeroTier IP 失败: {e}")
     return "127.0.0.1"  # fallback
+
+def safe_filename(name):
+    name = name.replace(" ", "_")
+    return "".join(c for c in name if c.isalnum() or c in "._-")[:100]
 
 def save_html(content, filename):
     output_dir = "html_outputs"
@@ -57,10 +62,10 @@ def custom_summarize_with_role(text_blocks, user_question, ai_role, model_name):
     ]
     return ask_deepseek(messages, include_datetime=True, model=model_name)
 
-def auto_process_question(user_question, title="AI分析完成", ENABLE_PUSH=True, ai_role="", model_name=""):
-    if determine_search_need(user_question):
+def auto_process_question(user_question, title, ENABLE_PUSH, ai_role, model_name):
+    if determine_search_need(user_question, model=model_name):
         print(f"🔍 [{user_question}] 判断需要搜索...")
-        keywords = generate_search_keywords(user_question)
+        keywords = generate_search_keywords(user_question, model=model_name)
         urls = []
         for kw in keywords:
             urls += bing_search(kw)
@@ -73,7 +78,7 @@ def auto_process_question(user_question, title="AI分析完成", ENABLE_PUSH=Tru
             content = fetch_webpage_text(url)
             print(f"📝 正在分析网页：{url}")
             if content:
-                summary = summarize_each_page(content, url, user_question)
+                summary = summarize_each_page(content, url, user_question, model=model_name)
                 summaries.append(f"[{url}]\n{summary}")
         
         combined_summary = "\n\n".join(summaries)
@@ -90,13 +95,14 @@ def auto_process_question(user_question, title="AI分析完成", ENABLE_PUSH=Tru
     if ENABLE_PUSH:
         try:
             trimmed_answer = remove_think(final_answer)
-            print(f"推送内容（统一生成网页）：{trimmed_answer}")
+            #print(f"推送内容（统一生成网页）：{trimmed_answer}")
 
-            # 统一保存成html网页
-            safe_name = safe_filename(user_question)
+            # 统一保存成html网页，限制文件名长度
+            safe_name = safe_filename(user_question)[:50]  # 限制 base 名长度
             date_str = datetime.now().strftime("%Y-%m-%d")
             filename = f"{date_str}_{safe_name}.html"
-            #filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            if len(filename) > 80:
+                filename = filename[:80] + '.html'
             save_html(trimmed_answer, filename)
 
             # 获取 ZeroTier 分配的本机 IP
@@ -124,9 +130,10 @@ if __name__ == "__main__":
         config = json.load(f)
 
     questions = config.get("questions", {})
-    MODEL_NAME = config.get("model_name", "deepseek-r1:14b-qwen-distill-q8_0")
-    AI_ROLE = config.get("ai_role", "你是一个助手")
+    MODEL_NAME = config.get("model_name")
+    AI_ROLE = config.get("ai_role")
     ENABLE_PUSH = config.get("enable_push", True)
 
     for title, q in questions.items():
+        print(q,title,ENABLE_PUSH,AI_ROLE,MODEL_NAME)
         auto_process_question(q, title, ENABLE_PUSH, AI_ROLE, MODEL_NAME)

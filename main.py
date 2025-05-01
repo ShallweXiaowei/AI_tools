@@ -4,7 +4,8 @@ import re
 
 
 #model = "deepseek-r1:14b"
-model = "deepseek-r1:14b-qwen-distill-q8_0"
+model = "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L"
+
 url = "http://localhost:11434/api/chat"
 headers = {"Content-Type": "application/json"}
 
