@@ -28,3 +28,5 @@ saved_sessions/
 # 忽略输出的 HTML 网页文件夹
 html_outputs/
 my_text/
+
+.*

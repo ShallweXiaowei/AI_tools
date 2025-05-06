@@ -4,6 +4,10 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Logging setup
+import logging
+logging.basicConfig(filename='server.log', level=logging.INFO)
+
 OUTPUT_DIR = 'html_outputs'
 
 INDEX_TEMPLATE = """
@@ -54,6 +58,7 @@ INDEX_TEMPLATE = """
 
 @app.route('/')
 def list_files():
+    app.logger.info("Accessed file list")
     files = []
     try:
         for f in os.listdir(OUTPUT_DIR):
@@ -68,11 +73,25 @@ def list_files():
 
 @app.route('/outputs/<path:filename>')
 def serve_file(filename):
+    app.logger.info(f"Serving file: {filename}")
     return send_from_directory(OUTPUT_DIR, filename)
 
 @app.template_filter('datetimeformat')
 def datetimeformat(value):
     return datetime.fromtimestamp(value).strftime('%Y-%m-%d %H:%M:%S')
+
+
+# Icon routes for favicon and Apple touch icons
+from flask import send_file
+import io
+
+@app.route('/favicon.ico')
+@app.route('/apple-touch-icon.png')
+@app.route('/apple-touch-icon-precomposed.png')
+def empty_icon():
+    # Return a 1x1 transparent PNG
+    icon_bytes = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\xdacd\xf8\x0f\x00\x01\x01\x01\x00\x18\xdd\x03\xd2\x00\x00\x00\x00IEND\xaeB`\x82'
+    return send_file(io.BytesIO(icon_bytes), mimetype='image/png')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

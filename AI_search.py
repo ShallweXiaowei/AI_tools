@@ -131,7 +131,7 @@ def determine_search_need(question, model=MODEL_NAME):
     print( "determine_search_need:", cleaned_reply)
     return cleaned_reply == "YES"
 
-def bing_search(query, max_results=2):
+def bing_search(query, max_results=4):
     options = Options()
     options.add_argument("--headless")  # 留空以显示窗口
     options.add_argument("--disable-gpu")
