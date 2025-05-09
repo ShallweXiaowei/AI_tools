@@ -6,6 +6,7 @@ __pycache__/
 
 # 忽略虚拟环境
 .venv/
+venv/
 
 # 忽略临时文件
 *.log

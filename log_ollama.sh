@@ -1,2 +1,4 @@
 #!/usr/bin/bash
-journalctl -u ollama -f
+
+
+sudo journalctl -u ollama.service -f

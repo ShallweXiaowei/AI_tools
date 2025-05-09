@@ -1,3 +1,3 @@
 #!/usr/bin/bash
 
-sudo systemctl isolate multi-user.target
+sudo systemctl stop sddm

@@ -36,10 +36,11 @@ def load_local_texts(filenames=None, folder=MY_TEXT_DIR):
     if not os.path.exists(folder):
         print(f"⚠️ 本地文本文件夹 {folder} 不存在。")
         return text_blocks
+    exts = (".txt", ".md", ".json", ".csv", ".pdf", ".html", ".htm")
     if filenames is None:
-        file_list = [f for f in os.listdir(folder) if f.endswith((".txt", ".md", ".json", ".csv", ".pdf"))]
+        file_list = [f for f in os.listdir(folder) if f.endswith(exts)]
     else:
-        file_list = [f for f in filenames if f.endswith((".txt", ".md", ".json", ".csv", ".pdf"))]
+        file_list = [f for f in filenames if f.endswith(exts)]
     for filename in file_list:
         filepath = os.path.join(folder, filename)
         try:
@@ -53,6 +54,11 @@ def load_local_texts(filenames=None, folder=MY_TEXT_DIR):
             else:
                 with open(filepath, "r", encoding="utf-8") as f:
                     content = f.read()
+                    if filename.endswith((".html", ".htm")):
+                        soup = BeautifulSoup(content, "html.parser")
+                        for tag in soup(["script", "style", "noscript"]):
+                            tag.decompose()
+                        content = soup.get_text(separator='\n')
                     text_blocks.append(f"[参考资料: {filename}]\n以下是本地文件的内容，请作为参考资料：\n{content}\n")
         except Exception as e:
             print(f"❌ 读取文件 {filename} 失败: {e}")
@@ -62,7 +68,8 @@ def list_local_texts(folder=MY_TEXT_DIR):
     if not os.path.exists(folder):
         print(f"⚠️ 本地文本文件夹 {folder} 不存在。")
         return []
-    files = sorted([f for f in os.listdir(folder) if f.endswith((".txt", ".md", ".json", ".csv", ".pdf"))])
+    exts = (".txt", ".md", ".json", ".csv", ".pdf", ".html", ".htm")
+    files = sorted([f for f in os.listdir(folder) if f.endswith(exts)])
     for idx, f in enumerate(files):
         print(f"{idx+1}: {f}")
     return files
@@ -98,6 +105,7 @@ def generate_search_keywords(question, model=MODEL_NAME):
         生成的关键词会自动化程序搜索,然后结果会被feed给AI.
         你会根据问题自主判断需要生成多少个关键词.如果问题简单,一个或两个关键词搜索结果足够回答,就不要生成更多了;反之如果问题复杂且宽泛,可以多生成几个.
         涉及到美国的公司,新闻,财报,股市等问题,用英文关键词搜索
+        用户住在Jersey City, NJ, 07302
         如果用户的问题里面包含网址，那么其中一个关键词就是这个网址，不要有任何其他多余的字
         输出结果只包含关键词.关键词尽量简短以保证涵盖到流量大的网站.
          '''},
@@ -126,7 +134,6 @@ def determine_search_need(question, model=MODEL_NAME):
     think_content = think_match.group(1).strip() if think_match else None
     cleaned_reply = re.sub(r'<think>.*?</think>', '', result, flags=re.DOTALL).strip()
 
-
     print("befoire clearn think:", result)
     print( "determine_search_need:", cleaned_reply)
     return cleaned_reply == "YES"
@@ -136,7 +143,7 @@ def bing_search(query, max_results=4):
     options.add_argument("--headless")  # 留空以显示窗口
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--window-size=800,600")
     driver = webdriver.Chrome(options=options)
 
     driver.get(f"https://www.bing.com/search?q={query}")

@@ -1,8 +1,8 @@
 {
   "questions": {
-    "每日一题": "搜索并随机选一道leetcode网站上的easy难度算法问题推送给我,给出题目的题号和题目名字,包括例子演示,思路,和答案.答案包括python和C++"
+    "天气": "今天天气如何"
   },
-  "model_name": "deepseek-r1:14b-qwen-distill-q8_0",
-  "ai_role": "你是一个资深的程序员老师,负责教学生解决leetcode题目",
+  "model_name": "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L",
+  "ai_role": "You are a financial assistant with financial knowledge. knows the market, and know what news are useful for investor,用户住在纽约",
   "enable_push": true
 }
