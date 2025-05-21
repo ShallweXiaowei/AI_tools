@@ -82,6 +82,7 @@ def auto_process_question(user_question, title, ENABLE_PUSH, ai_role, model_name
                 summaries.append(f"[{url}]\n{summary}")
         
         combined_summary = "\n\n".join(summaries)
+        print(f"📝 汇总网页内容：\n{combined_summary}")
         final_answer = custom_summarize_with_role(combined_summary, user_question, ai_role, model_name)
 
         if urls:

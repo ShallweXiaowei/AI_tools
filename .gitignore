@@ -7,6 +7,9 @@ __pycache__/
 # 忽略虚拟环境
 .venv/
 venv/
+email_venv/
+gmail-oauth2-tools/
+
 
 # 忽略临时文件
 *.log
@@ -30,4 +33,19 @@ saved_sessions/
 html_outputs/
 my_text/
 
-.*
+# 忽略编辑器生成的临时文件或备份文件
+*~
+.*.swp
+.*.swo
+.*.bak
+.*.save
+.*.tmp
+.*.orig
+
+
+#####
+client_secret_260898294900-17kaubijnjmfpqurqquibk1et07780vf.apps.googleusercontent.com.json
+._client_secret_260898294900-17kaubijnjmfpqurqquibk1et07780vf.apps.googleusercontent.com.json
+mail_file_date_map.csv
+._mail_file_date_map.csv
+whisper-medium-ct2/

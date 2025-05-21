@@ -23,10 +23,10 @@ def remove_think(res):
 # === 配置 ===
 OLLAMA_URL = "http://localhost:11434/api/chat"
 #MODEL_NAME = "deepseek-r1:14b"
-#MODEL_NAME = "gemma3:27b"
+MODEL_NAME = "gemma3:12b"
 #MODEL_NAME = "deepseek-r1:14b"
 #MODEL_NAME = "deepseek-r1:14b-qwen-distill-q8_0"
-MODEL_NAME = "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L"
+#MODEL_NAME = "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L"
 
 
 HEADERS = {"Content-Type": "application/json"}
@@ -122,12 +122,14 @@ def generate_search_keywords(question, model=MODEL_NAME):
     keywords = [kw.strip().translate(str.maketrans('', '', '*"\'')) for kw in lines if kw.strip()]
     return keywords
 
-def determine_search_need(question, model=MODEL_NAME):
+def determine_search_need(question, model=MODEL_NAME, dialogue_history=None):
     messages = [
-        {"role": "system", "content": "你是一个判断专家，负责判断一个问题是否需要搜索引擎获取答案。如果用户问题需要实时信息、数据更新或特定网页信息，或者问题问的是最近,请回答 YES，否则回答 NO。只输出 YES 或 NO。"},
-        {"role": "system", "content": "如果用户让你查网站，输出 YES"},
+        {"role": "system", "content": "你是一个判断专家，负责判断一个问题是否需要搜索引擎获取答案。如果用户问题需要实时信息、数据更新或者问题问的是最近,请回答 YES，否则回答 NO。只输出 YES 或 NO。"},
+        {"role": "system", "content": "如果用户在问题后面提供了参考资料,输出 NO"},
         {"role": "user", "content": f"{question}"}
     ]
+    if dialogue_history:
+        messages = dialogue_history + messages
     result = ask_deepseek(messages, include_datetime=True, model=model).strip()
     # 清理 think 标签
     think_match = re.search(r'<think>(.*?)</think>', result, re.DOTALL)
@@ -138,27 +140,47 @@ def determine_search_need(question, model=MODEL_NAME):
     print( "determine_search_need:", cleaned_reply)
     return cleaned_reply == "YES"
 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 def bing_search(query, max_results=4):
     options = Options()
-    options.add_argument("--headless")  # 留空以显示窗口
+    options.add_argument("--headless=new")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-    options.add_argument("--window-size=800,600")
-    driver = webdriver.Chrome(options=options)
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--window-size=1200,800")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 
-    driver.get(f"https://www.bing.com/search?q={query}")
-    time.sleep(3)  # 等待页面加载完成
+    try:
+        driver = webdriver.Chrome(options=options)
+    except Exception as e:
+        print("❌ WebDriver 启动失败:", e)
+        return []
 
-    results = driver.find_elements(By.CSS_SELECTOR, 'li.b_algo h2 a')  # 修改 CSS 选择器
-    urls = []
-    for result in results:
-        href = result.get_attribute("href")
-        if href and href.startswith("http"):
-            urls.append(href)
-        if len(urls) >= max_results:
-            break
+    try:
+        driver.get(f"https://www.bing.com/search?q={query}")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'li.b_algo h2 a'))
+        )
 
-    driver.quit()
+        results = driver.find_elements(By.CSS_SELECTOR, 'li.b_algo h2 a')
+        urls = []
+        for result in results:
+            href = result.get_attribute("href")
+            if href and href.startswith("http"):
+                urls.append(href)
+                print(f"🔗 搜索到的链接：{href}")
+            if len(urls) >= max_results:
+                break
+    except Exception as e:
+        print(f"❌ 搜索过程中出错: {e}")
+        driver.save_screenshot("error_page.png")
+        urls = []
+    finally:
+        driver.quit()
+
     return urls
 
 def fetch_webpage_text(url):
@@ -342,7 +364,7 @@ if __name__ == "__main__":
             # 让AI综合本地文本和问题判断是否需要搜索
             question_context = user_question + "\n\n" + combined_local_texts if combined_local_texts else user_question
             print("question_context:", question_context)
-            if determine_search_need(question_context):
+            if determine_search_need(question_context, dialogue_history=dialogue_history):
                 keywords = generate_search_keywords(question_context)
                 print("\n🔍 AI 建议搜索关键词：")
                 for kw in keywords:
@@ -373,7 +395,7 @@ if __name__ == "__main__":
             combined_summary_text = "\n\n".join(summaries + local_texts)
 
             print("\n🤖 正在总结信息，请稍候...\n")
-            summary = summarize_with_deepseek(question_context, user_question, dialogue_history=dialogue_history)
+            summary = summarize_with_deepseek(combined_summary_text, user_question, dialogue_history=dialogue_history)
             divi = '''
             ------------------------------------------------  ----------------  
             ##########################################################################

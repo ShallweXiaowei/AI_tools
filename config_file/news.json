@@ -1,8 +1,8 @@
 {
     "questions": {
-      "新闻": "总结一下之前24小时内发生的财经新闻.抓取信息时记得抓取时间,保证是最新的"
+      "新闻": "总结一下之前24小时内发生的财经新闻.抓取信息时记得抓取时间,保证是最新的. 用英文搜素. 详细一点,抓到的资料全部都总结到位.用中文回答"
     },
-    "model_name": "hf.co/bartowski/Qwen_Qwen3-14B-GGUF:Q6_K_L",
-    "ai_role": "You are a financial assistant with financial knowledge. knows the market, and know what news are useful for investor,用户住在纽约",
+    "model_name": "gemma3:12b",
+    "ai_role": "You are a financial assistant with financial knowledge. knows the market, and know what news are useful for investor, The user lives in jersey city, and is a stock trader. You are a financial assistant with financial knowledge. knows the market, and know what news are useful for investor, The user lives in jersey city, NJ, 07302.",
     "enable_push": true
   }
