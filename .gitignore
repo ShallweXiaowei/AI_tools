@@ -42,6 +42,8 @@ my_text/
 .*.tmp
 .*.orig
 
+._*
+
 
 #####
 client_secret_260898294900-17kaubijnjmfpqurqquibk1et07780vf.apps.googleusercontent.com.json
